@@ -6,7 +6,8 @@ class Pos
 	private:
 		int x;
 		int y;
-
+		int pathSize;
+		Pos** path;
 	public:
 		Pos(int a, int b);
 
@@ -14,7 +15,13 @@ class Pos
 
 		int getX();
 		int getY();
+		int getPathSize();
+		Pos** getPath();
 		
-		bool equal(Pos* other);
+		void setPathSize(int oldSize);
+		void makePath(int oldSize, Pos** oldPath);
+
+		bool operator==(Pos* other);
+		bool equals(Pos* other);
 };
 #endif

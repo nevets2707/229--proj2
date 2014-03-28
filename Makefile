@@ -12,9 +12,11 @@ simplehero.o : simplehero.cpp Pos.o
 ssbros : ssbros.cpp simplehero.o Pos.o
 	g++ -g -Wall -o ssbros ssbros.cpp Actor.o GraphMap.o GameManager.o OtherActors.o simplehero.o Pos.o -lncurses
 
+test : test.cpp
+	g++ -g -Wall -o test test.cpp Pos.o -lncurses
 
 clean:
-	rm *.o ssbros
+	rm ssbros
 
 
 tarball:

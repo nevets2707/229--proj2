@@ -9,13 +9,16 @@
 #include "GameManager.hpp"
 #include "Actor.hpp"
 #include "OtherActors.hpp"
+#include "simplehero.hpp"
 #include <stdlib.h>
 
 int main( int argc, char** argv )
 {
+	
 	Actor** actors = (Actor**) malloc(10 * sizeof(Actor*));
+	int num_actors = 1;
 
-	int num_actors = 0;
+	actors[0] = new simplehero(ACTOR_HERO);
 
 	GameManager* manager = new GameManager(argc, argv, actors, num_actors);
 	manager->addActor(new Actor(ACTOR_HERO));
