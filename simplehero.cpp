@@ -3,12 +3,11 @@
 #include "Pos.hpp"
 #include "simplehero.hpp"
 
-int time;
-
 simplehero::simplehero(int type) : Actor(type)
 {
 	printf("Creating hero\n");
 	time = 0;
+	
 }
 
 simplehero::~simplehero()
@@ -18,30 +17,44 @@ simplehero::~simplehero()
 
 int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
+	// time is not being updated correctly
 	//printf("Selecting neighbor\n");
 	int x, y, a, b;
 	Pos** p;
 	Pos* goal = findGoal(map, time);
-	time++;
+	
+	if(goal == 0)
+	{
+		printf("Couldn't find goal\n");
+		return -1111;
+	}
+
+
 	Pos* toGo = BFSearch(map, cur_x, cur_y, goal);
 	
 	//printf("Done searching\n");
 
 	if(toGo == 0)
 	{
-		//printf("No target found\n");
+		printf("No target found\n");
 		return -1111111;
 	}
 	
 	p = toGo->getPath();
 	x = p[1]->getX();
 	y = p[1]->getY();
+	
+
 	 
 	for(int i = 0; i < map->getNumNeighbors(cur_x, cur_y); i++)
 	{
 		map->getNeighbor(cur_x, cur_y, i, a, b);
 		if(x == a && y == b)
 		{
+			if(goal->getX()==a && goal->getY()==b)
+			{
+				time++;
+			}
 			return i;
 		}
 	}
@@ -95,6 +108,7 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 
 Pos* simplehero::findGoal(GraphMap* map, int t)
 {
+
 	Pos* goal;
 	int goalX, goalY;
 	for(int i = 0; i <= map->getNumActors(); i++)
@@ -122,7 +136,7 @@ Pos* simplehero::findGoal(GraphMap* map, int t)
 }
 
 Actor* simplehero::duplicate()
-{
+{ 
 	printf("Duplicating\n");
 	simplehero* s = new simplehero(getType());
 	return s;

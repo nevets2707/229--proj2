@@ -10,7 +10,7 @@ class simplehero : public Actor
 	private:
 		Pos* BFSearch(GraphMap* map, int x, int y, Pos* g);
 		Pos* findGoal(GraphMap* map, int time);
-		int time;
+		int time;	
 	protected:
 
 	public:

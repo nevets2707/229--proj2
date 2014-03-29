@@ -14,23 +14,24 @@
 
 int main( int argc, char** argv )
 {
-	
 	Actor** actors = (Actor**) malloc(10 * sizeof(Actor*));
-	int num_actors = 1;
-
+	
 	actors[0] = new simplehero(ACTOR_HERO);
+
+	int num_actors = 1;
 
 	GameManager* manager = new GameManager(argc, argv, actors, num_actors);
 	manager->addActor(new Actor(ACTOR_HERO));
 	manager->play();
 
 	delete manager;
+	manager = 0;
 
 	for ( int i = 0; i < num_actors; i++ )
 	{
 		delete actors[i];
 	}
 	free(actors);
-
+	actors = 0;
 	return 0;
 }

@@ -46,16 +46,5 @@ class KeyboardActor : public Actor
 		virtual const char* getActorId();
 };
 
-class Pursuer : public Actor
-{
-	public:
-		Pursuer(int type);
-		virtual ~Pursuer();
-		virtual int selectNeighbor(GraphMap* map, int x, int y);
-		virtual Actor* duplicate();
-		virtual const char* getActorId();
-};
-
-
 
 #endif /* OTHERACTORS_HPP_ */
