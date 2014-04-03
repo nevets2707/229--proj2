@@ -5,9 +5,7 @@
 
 simplehero::simplehero(int type) : Actor(type)
 {
-	printf("Creating hero\n");
-	time = 0;
-	
+//	printf("Creating hero\n");
 }
 
 simplehero::~simplehero()
@@ -18,15 +16,15 @@ simplehero::~simplehero()
 int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
 	// time is not being updated correctly
-	//printf("Selecting neighbor\n");
+	// printf("Selecting neighbor\n");
 	int x, y, a, b;
 	Pos** p;
-	Pos* goal = findGoal(map, time);
+	Pos* goal = findGoal(map, cur_x, cur_y);
 	
 	if(goal == 0)
 	{
 		printf("Couldn't find goal\n");
-		return -1111;
+		return -1;
 	}
 
 
@@ -37,29 +35,34 @@ int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	if(toGo == 0)
 	{
 		printf("No target found\n");
-		return -1111111;
+		return -1;
 	}
 	
 	p = toGo->getPath();
-	x = p[1]->getX();
-	y = p[1]->getY();
-	
+/*	if(p == 0 || p[1]->getX() < 0)
+	{
+		printf("ERRRORRORROR\n");
+		goal = findGoal(map, cur_x, cur_y);
+		toGo = BFSearch(map ,cur_x, cur_y, goal);
+	}*/
+	if(toGo->getPathSize() == 1)
+	{
+		return 0;
+	}
 
-	 
+		x = p[1]->getX();
+		y = p[1]->getY();
+	
 	for(int i = 0; i < map->getNumNeighbors(cur_x, cur_y); i++)
 	{
 		map->getNeighbor(cur_x, cur_y, i, a, b);
 		if(x == a && y == b)
 		{
-			if(goal->getX()==a && goal->getY()==b)
-			{
-				time++;
-			}
 			return i;
 		}
 	}
-
-	return -1;
+	printf("Shouldn't get here");
+	return 0;
 }
 
 
@@ -75,6 +78,11 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	start->setPathSize(0);
 	start->makePath(0, 0);
 	std::set<int> touched;
+
+	if(start->equals(g))
+	{
+		return start;
+	}
 
 	q.push(start);
 	vert = map->getVertex(start->getX(), start->getY());
@@ -106,45 +114,86 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	return 0;
 }
 
-Pos* simplehero::findGoal(GraphMap* map, int t)
+Pos* simplehero::findGoal(GraphMap* map, int x, int y)
 {
 
 	Pos* goal;
 	int goalX, goalY;
+	bool skipped = false;
+	Pos* cur = new Pos(x, y);
 	for(int i = 0; i <= map->getNumActors(); i++)
 	{
-		if(map->getActorType(i) & ACTOR_EATABLE)
-		{
-			if(t > 0)
-			{
-				t--;
-			}
-			else
-			{
-			map->getActorPosition(i, goalX, goalY);
-			break;
-			}
-		}
 		if(i == map->getNumActors())
 		{
+			if(skipped)
+			{
+				continue;
+			}
 			return 0;
+		}
+
+		if(map->getActorType(i) & 4)
+		{
+			if(map->getActorType(i) & 16)
+			{
+				continue;
+			}
+			map->getActorPosition(i, goalX, goalY);
+			if(goalX == -1 && goalY == -1)
+			{
+				continue;
+			}
+			if(!BFSearch(map, goalX, goalY, cur))
+			{
+				skipped = true;
+				continue;
+			}
+			goal = new Pos(goalX, goalY);
+			return goal;
+		}
+		
+	}
+	if(skipped)
+	{
+		for(int i = 0; i <= map->getNumActors(); i++)
+		{
+			if(i == map->getNumActors())
+			{
+				return 0;
+			}
+
+			if(map->getActorType(i) & 4)
+			{
+				if(map->getActorType(i) & 16)
+				{
+					continue;
+				}
+				map->getActorPosition(i, goalX, goalY);
+				if(goalX == -1 && goalY == -1)
+				{
+					continue;
+				}
+				break;	
+			}
+			
 		}
 	}
 
+//	printf("Going for (%d,%d)\n", goalX, goalY);
 	goal = new Pos(goalX, goalY);
 	return goal;
 }
 
 Actor* simplehero::duplicate()
 { 
-	printf("Duplicating\n");
+//	printf("Duplicating\n");
 	simplehero* s = new simplehero(getType());
 	return s;
 }
 
 const char* simplehero::getActorId()
 {
-	printf("Getting id\n");
+//	printf("Getting id\n");
 	return "simplehero";
 }
 
