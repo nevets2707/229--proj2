@@ -1,11 +1,2 @@
-PLANE 5 10
-#####
-# h #
-#PPP#
-#PPP#
-#PPP#
-#PPP#
-#PPP#
-#PPP#
-#PPP#
-#####
+PLANE 1 2
+h*

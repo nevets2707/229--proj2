@@ -1,19 +1,32 @@
 #include "Pos.hpp"
 #include <stdlib.h>
 
-int x;
-int y;
-int pathSize;
-Pos** path;
+//int x;
+//int y;
+//int pathSize;
+//Pos** path;
 
 Pos::Pos(int a, int b)
 {
+	path = 0;
+	pathSize = 0;
 	x = a;
 	y = b;
 }
 
 Pos::~Pos()
 {
+	if(path != 0)
+	{
+		for(int i = 0; i < pathSize; i++)
+		{
+			delete path[i];
+	
+		}
+		free(path);
+	
+	//	delete [] path;
+	}
 
 }
 
@@ -45,15 +58,15 @@ void Pos::setPathSize(int oldSize)
 void Pos::makePath(int oldSize, Pos** oldPath)
 {
 	Pos* cur = new Pos(x, y);
-
 	path = (Pos**)malloc((oldSize + 1) * sizeof(Pos*));
+//	path = Pos[oldSize + 1];
+
 	for(int i = 0; i < oldSize; i++)
 	{
-		path[i] = (Pos*)malloc(sizeof(Pos));
 		path[i] = oldPath[i];
 	}
-	path[oldSize] = (Pos*)malloc(sizeof(Pos));
-	path[oldSize] = cur;
+	path[oldSize] = new Pos(cur->getX(), cur->getY());
+	delete cur;
 }
 
 bool Pos::operator==(Pos* other)
