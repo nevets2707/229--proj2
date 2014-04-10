@@ -1,18 +1,19 @@
 #include <queue>
 #include <set>
-#include "SmartHero.hpp"
+#include "SmartPowerup.hpp"
 #include "Pos.hpp"
 
-SmartHero::SmartHero(int type) : Actor(type)
+SmartPowerup::SmartPowerup(int type) : Actor(type)
 {
 }
 
-SmartHero::~SmartHero()
+SmartPowerup::~SmartPowerup()
 {
 }
 
-int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
+int SmartPowerup::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
+	// printf("Selecting neighbor\n");
 	int x, y, a, b;
 	Pos** p;
 	Pos* goal = findGoal(map, cur_x, cur_y);
@@ -59,15 +60,12 @@ int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	}
 	printf("Shouldn't get here");
 	return 0;
-
 }
 
-Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
+Pos* SmartPowerup::BFSearch(GraphMap* map, int x, int y, Pos* g)
 {
-	int a, b;
-	int enemyX, enemyY;
+int a, b;
 	int vert;
-	bool skip;
 	Pos* temp;
 	Pos* temp2;
 	std::queue<Pos*> q;
@@ -94,25 +92,8 @@ Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 			map->getNeighbor(temp->getX(), temp->getY(), i, a, b);
 			temp2 = new Pos(a,b);
 			vert = map->getVertex(a, b);
-			skip = false;
 			if(!touched.count(vert))
 			{
-				for(int i = 0; i < map->getNumActors(); i++)
-				{
-					if(map->getActorType(i) & ACTOR_ENEMY)
-					{
-						map->getActorPosition(i, enemyX, enemyY);
-						if(a == enemyX && b == enemyY)
-						{
-							touched.insert(vert);
-							skip = true;
-						}
-					}
-				}
-				if(skip)
-				{
-					continue;
-				}
 				temp2->setPathSize(temp->getPathSize());
 				temp2->makePath(temp->getPathSize(), temp->getPath());
 				q.push(temp2);
@@ -126,89 +107,39 @@ Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	}
 
 	return 0;
+
 }
 
-Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
+Pos* SmartPowerup::findGoal(GraphMap* map, int x, int y)
 {
+	//Find a enemy to go towards
 	Pos* goal;
 	int goalX, goalY;
-	bool skipped = false;
-	Pos* cur = new Pos(x, y);
-	for(int i = 0; i <= map->getNumActors(); i++)
-	{
-		if(i == map->getNumActors())
-		{
-			if(skipped)
-			{
-				continue;
-			}
-			return 0;
-		}
 
-		if(map->getActorType(i) & 4)
+	for(int i = 0; i < map->getNumActors(); i++)
+	{
+		if(map->getActorType(i) & ACTOR_ENEMY)
 		{
-			if(map->getActorType(i) & 16)
-			{
-				continue;
-			}
 			map->getActorPosition(i, goalX, goalY);
-			if(goalX == -1 && goalY == -1)
-			{
-				continue;
-			}
-			if(!BFSearch(map, goalX, goalY, cur))
-			{
-				skipped = true;
-				continue;
-			}
-			goal = new Pos(goalX, goalY);
-			return goal;
-		}
-		
-	}
-	if(skipped)
-	{
-		for(int i = 0; i <= map->getNumActors(); i++)
-		{
-			if(i == map->getNumActors())
-			{
-				return 0;
-			}
-
-			if(map->getActorType(i) & 4)
-			{
-				if(map->getActorType(i) & 16)
-				{
-					continue;
-				}
-				map->getActorPosition(i, goalX, goalY);
-				if(goalX == -1 && goalY == -1)
-				{
-					continue;
-				}
-				break;	
-			}
-			
+			break;
 		}
 	}
-
-//	printf("Going for (%d,%d)\n", goalX, goalY);
 	goal = new Pos(goalX, goalY);
+
 	return goal;
-
 }
 
-Actor* SmartHero::duplicate()
+Actor* SmartPowerup::duplicate()
 {
-	return new SmartHero(getType());
+	return new SmartPowerup(getType());
 }
 
-const char* SmartHero::getActorId()
+const char* SmartPowerup::getActorId()
 {
-	return "smarthero";
+	return "smartpowerup";
 }
 
-const char* SmartHero::getNetId()
+const char* SmartPowerup::getNetId()
 {
 	return "srmonson";
 }

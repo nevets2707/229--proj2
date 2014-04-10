@@ -1,0 +1,15 @@
+Project 2A
+
+1) Steven Monson - srmonson
+
+2) SimpleHero - Tries to find an eatable that the hero can reach and also go back to its current position. If none can be reached it chooses the first edible available. Then it uses a breadth first search to find a path to the edible.
+
+3) 
+
+4) Pos.cpp - Used to hold and compare the vertices for finding a goal and traversing to it. It also holds an array of Pos pointers to keep track of the path to get to that vertice. 
+
+simplehero.cpp - Has the method to select which neighbor to move to based on its the findGoal and BFSearch methods described above
+
+
+
+

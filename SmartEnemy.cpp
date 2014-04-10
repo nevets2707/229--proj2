@@ -1,25 +1,35 @@
 #include <queue>
 #include <set>
+#include "SmartEnemy.hpp"
 #include "Pos.hpp"
-#include "simplehero.hpp"
 
-simplehero::simplehero(int type) : Actor(type)
+
+SmartEnemy::SmartEnemy(int type) : Actor(type)
 {
-//	printf("Creating hero\n");
 }
 
-simplehero::~simplehero()
+SmartEnemy::~SmartEnemy()
 {
-	
 }
 
-int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
+int SmartEnemy::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
-	// printf("Selecting neighbor\n");
 	int x, y, a, b;
 	Pos** p;
 	Pos* goal = findGoal(map, cur_x, cur_y);
 	
+	for(int i = 0; i < map->getNumActors(); i++)
+	{
+		if(map->getActorType(i))
+		{
+			map->getActorPosition(i, x, y);
+			if(x == cur_x && y == cur_y)
+			{
+				return 0;
+			}
+		}
+	}
+
 	if(goal == 0)
 	{
 		printf("Couldn't find goal\n");
@@ -62,13 +72,12 @@ int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	}
 	printf("Shouldn't get here");
 	return 0;
+
 }
 
-
-Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
+Pos* SmartEnemy::BFSearch(GraphMap* map, int x, int y, Pos* g)
 {
-	//printf("Breath-First Searching\n");
-	int a, b;
+int a, b;
 	int vert;
 	Pos* temp;
 	Pos* temp2;
@@ -111,94 +120,26 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	}
 
 	return 0;
+
 }
 
-Pos* simplehero::findGoal(GraphMap* map, int x, int y)
+Pos* SmartEnemy::findGoal(GraphMap* map, int x, int y)
 {
-
-	Pos* goal;
-
-	int goalX, goalY;
-	bool skipped = false;
-	Pos* cur = new Pos(x, y);
-	for(int i = 0; i <= map->getNumActors(); i++)
-	{
-		if(i == map->getNumActors())
-		{
-			if(skipped)
-			{
-				continue;
-			}
-			return 0;
-		}
-
-		if(map->getActorType(i) & 4)
-		{
-			if(map->getActorType(i) & ACTOR_DEAD)
-			{
-				continue;
-			}
-
-			map->getActorPosition(i, goalX, goalY);
-
-			if(!BFSearch(map, goalX, goalY, cur))
-			{
-				skipped = true;
-				continue;
-			}
-
-			goal = new Pos(goalX, goalY);
-			return goal;
-		
-		}
-		
-	}
-
-	if(skipped)
-	{
-		for(int i = 0; i <= map->getNumActors(); i++)
-		{
-			if(i == map->getNumActors())
-			{
-				return 0;
-			}
-
-			if(map->getActorType(i) & 4)
-			{
-				if(map->getActorType(i) & 16)
-				{
-					continue;
-				}
-				map->getActorPosition(i, goalX, goalY);
-				if(goalX == -1 && goalY == -1)
-				{
-					continue;
-				}
-				break;	
-			}
-			
-		}
-	}
-
-//	printf("Going for (%d,%d)\n", goalX, goalY);
-	goal = new Pos(goalX, goalY);
-	return goal;
+	//Find eatable and stand on it
+	return 0;
 }
 
-Actor* simplehero::duplicate()
-{ 
-//	printf("Duplicating\n");
-	simplehero* s = new simplehero(getType());
-	return s;
-}
-
-const char* simplehero::getActorId()
+Actor* SmartEnemy::duplicate()
 {
-//	printf("Getting id\n");
-	return "simplehero";
+	return new SmartEnemy(getType());
 }
 
-const char* simplehero::getNetId()
+const char* SmartEnemy::getActorId()
+{
+	return "smartenemy";
+}
+
+const char* SmartEnemy::getNetId()
 {
 	return "srmonson";
 }
