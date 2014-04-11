@@ -38,8 +38,8 @@ test : test.cpp
 
 # Modify the clean target to remove YOUR .o files...
 clean:
-	rm ssbros OtherActors.o
+	rm Pos.o simplehero.o SmartHero.o SmartEnemy.o SmartPowerup.o ssbros OtherActors.o
 
 tarball:
-	tar czf project2.tar.gz Makefile *.hpp ssbros.cpp OtherActors.cpp *.o maps/*.txt
+	tar czf srmonson.tar.gz Makefile *.hpp *.cpp *.o maps/*.txt README
 

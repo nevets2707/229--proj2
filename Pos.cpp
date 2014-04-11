@@ -21,10 +21,10 @@ Pos::~Pos()
 		for(int i = 0; i < pathSize; i++)
 		{
 			delete path[i];
-	
+
 		}
 		free(path);
-	
+
 	//	delete [] path;
 	}
 
@@ -58,14 +58,14 @@ void Pos::setPathSize(int oldSize)
 void Pos::makePath(int oldSize, Pos** oldPath)
 {
 	Pos* cur = new Pos(x, y);
-	path = (Pos**)malloc((oldSize + 1) * sizeof(Pos*));
+	path = (Pos**)malloc((oldSize + 1) * sizeof(Pos*)); //Not getting freed
 //	path = Pos[oldSize + 1];
 
 	for(int i = 0; i < oldSize; i++)
 	{
 		path[i] = oldPath[i];
 	}
-	path[oldSize] = new Pos(cur->getX(), cur->getY());
+	path[oldSize] = new Pos(cur->getX(), cur->getY()); //Not getting freed
 	delete cur;
 }
 

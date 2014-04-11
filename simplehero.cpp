@@ -47,8 +47,13 @@ int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	}*/
 	if(toGo->getPathSize() == 1)
 	{
+		
 		delete goal;
-		delete toGo;
+		for(int i = 0; i < toGo->getPathSize(); i++)
+		{
+			delete p[i];
+		}
+	//	delete toGo;
 		return 0;
 	}
 
@@ -61,7 +66,11 @@ int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 		if(x == a && y == b)
 		{
 			delete goal;
-			delete toGo;
+			for(int j = 0; j < toGo->getPathSize(); j++)
+			{
+				delete p[j];
+			}
+	//		delete toGo;
 			return i;
 		}
 	}
@@ -79,7 +88,7 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	Pos* temp2;
 	std::queue<Pos*> q;
 	std::queue<Pos*> empty;
-	Pos* start = new Pos(x, y);
+	Pos* start = new Pos(x, y);  //Not getting freed
 	start->setPathSize(0);
 	start->makePath(0, 0);
 	std::set<int> touched;
@@ -93,6 +102,8 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	vert = map->getVertex(start->getX(), start->getY());
 	touched.insert(vert);
 
+	//delete start;
+
 	while(!q.empty())
 	{
 		temp = q.front();
@@ -100,7 +111,7 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 		for(int i = 0; i < map->getNumNeighbors(temp->getX(), temp->getY()); i++)
 		{
 			map->getNeighbor(temp->getX(), temp->getY(), i, a, b);
-			temp2 = new Pos(a,b);
+			temp2 = new Pos(a,b);  //Not getting freed
 			vert = map->getVertex(a, b);
 			if(!touched.count(vert))
 			{
@@ -111,14 +122,15 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 			}
 			if(temp2->equals(g))
 			{
-//				delete start;
+				//delete start;
 				std::swap(q,empty);
 				return temp2;
 			}
+			//delete temp2;
 		}
 	}
 
-//	delete start;
+	delete start;
 	return 0;
 }
 
