@@ -13,7 +13,7 @@ SmartHero::~SmartHero()
 
 int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
-	int x, y, a, b;
+/*	int x, y, a, b;
 	Pos** p;
 	Pos* goal = findGoal(map, cur_x, cur_y);
 	
@@ -35,12 +35,7 @@ int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	}
 	
 	p = toGo->getPath();
-/*	if(p == 0 || p[1]->getX() < 0)
-	{
-		printf("ERRRORRORROR\n");
-		goal = findGoal(map, cur_x, cur_y);
-		toGo = BFSearch(map ,cur_x, cur_y, goal);
-	}*/
+
 	if(toGo->getPathSize() == 1)
 	{
 		return 0;
@@ -59,12 +54,12 @@ int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	}
 	printf("Shouldn't get here");
 	return 0;
-
+*/
 }
 
 Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 {
-	int a, b;
+/*	int a, b;
 	int enemyX, enemyY;
 	int vert;
 	bool skip;
@@ -126,11 +121,12 @@ Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	}
 
 	return 0;
+*/
 }
 
 Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
 {
-	Pos* goal;
+/*	Pos* goal;
 	int goalX, goalY;
 	bool skipped = false;
 	Pos* cur = new Pos(x, y);
@@ -195,7 +191,7 @@ Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
 //	printf("Going for (%d,%d)\n", goalX, goalY);
 	goal = new Pos(goalX, goalY);
 	return goal;
-
+*/
 }
 
 Actor* SmartHero::duplicate()

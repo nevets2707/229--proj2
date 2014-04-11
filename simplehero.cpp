@@ -16,49 +16,38 @@ simplehero::~simplehero()
 int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
 	// printf("Selecting neighbor\n");
-	int x, y, a, b;
-	Pos** p;
+	int x, y, a, b;	
 	Pos* goal = findGoal(map, cur_x, cur_y);
-	
+	int g;
+
 	if(goal == 0)
 	{
 		printf("Couldn't find goal\n");
 		return 0;
 	}
 
+	g = map->getVertex(goal->getX(), goal->getY());
 
-	Pos* toGo = BFSearch(map, cur_x, cur_y, goal);
+	int toGo = BFSearch(map, cur_x, cur_y, g);
 	
 	//printf("Done searching\n");
 
-	if(toGo == 0)
+	if(toGo == -1)
 	{
 	//	printf("No target found\n");
 		delete goal;
 		return 0;
 	}
 	
-	p = toGo->getPath();
 /*	if(p == 0 || p[1]->getX() < 0)
 	{
 		printf("ERRRORRORROR\n");
 		goal = findGoal(map, cur_x, cur_y);
 		toGo = BFSearch(map ,cur_x, cur_y, goal);
 	}*/
-	if(toGo->getPathSize() == 1)
-	{
-		
-		delete goal;
-		for(int i = 0; i < toGo->getPathSize(); i++)
-		{
-			delete p[i];
-		}
-	//	delete toGo;
-		return 0;
-	}
 
-	x = p[1]->getX();
-	y = p[1]->getY();
+	map->getPosition(toGo, x, y);
+	
 	
 	for(int i = 0; i < map->getNumNeighbors(cur_x, cur_y); i++)
 	{
@@ -66,11 +55,7 @@ int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 		if(x == a && y == b)
 		{
 			delete goal;
-			for(int j = 0; j < toGo->getPathSize(); j++)
-			{
-				delete p[j];
-			}
-	//		delete toGo;
+
 			return i;
 		}
 	}
@@ -79,7 +64,7 @@ int simplehero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 }
 
 
-Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
+int simplehero::BFSearch(GraphMap* map, int x, int y, int g)
 {
 	//printf("Breath-First Searching\n");
 	int a, b;
@@ -90,18 +75,18 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 	std::queue<Pos*> empty;
 	Pos* start = new Pos(x, y);  //Not getting freed
 	start->setPathSize(0);
-	start->makePath(0, 0);
+	start->makePath(0,0,g);
 	std::set<int> touched;
-
-	if(start->equals(g))
-	{
-		return start;
-	}
 
 	q.push(start);
 	vert = map->getVertex(start->getX(), start->getY());
 	touched.insert(vert);
 
+	if(vert == g)
+	{
+		delete start;
+		return vert;
+	}
 	//delete start;
 
 	while(!q.empty())
@@ -116,22 +101,30 @@ Pos* simplehero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 			if(!touched.count(vert))
 			{
 				temp2->setPathSize(temp->getPathSize());
-				temp2->makePath(temp->getPathSize(), temp->getPath());
+				temp2->makePath(temp->getPathSize(), temp->getPath(), vert);
 				q.push(temp2);
 				touched.insert(vert);
 			}
-			if(temp2->equals(g))
+			if(vert == g)
 			{
 				//delete start;
-				std::swap(q,empty);
-				return temp2;
+				int x = temp2->getPath()[1];
+				while(!q.empty())
+				{
+					Pos* p = q.front();
+					q.pop();
+					delete p;
+				}
+		//		delete temp2;
+				delete start;
+				return x;
 			}
 			//delete temp2;
 		}
 	}
-
+	delete temp2;
 	delete start;
-	return 0;
+	return -1;
 }
 
 Pos* simplehero::findGoal(GraphMap* map, int x, int y)
@@ -139,9 +132,31 @@ Pos* simplehero::findGoal(GraphMap* map, int x, int y)
 
 	Pos* goal;
 	int goalX, goalY;
-	bool skipped = false;
-	Pos* cur = new Pos(x, y);
-	Pos* goBack = 0;
+	int nX, nY;
+	bool skipped = false;	
+	int goBack;
+
+	for(int j = 0; j < map->getNumNeighbors(x, y); j++)
+	{
+		map->getNeighbor(x, y, j, nX, nY);
+		for(int i = 0; i < map->getNumActors(); i++)
+		{
+			if(map->getActorType(i) & ACTOR_EATABLE)
+			{
+				if(map->getActorType(i) & ACTOR_DEAD)
+				{
+					continue;
+				}
+				map->getActorPosition(i, goalX, goalY);			
+				if(goalX == nX && goalY == nY)
+				{
+					goal = new Pos(goalX, goalY);
+					return goal;
+				}
+				
+			}
+		}
+	}
 	for(int i = 0; i <= map->getNumActors(); i++)
 	{
 		if(i == map->getNumActors())
@@ -162,16 +177,15 @@ Pos* simplehero::findGoal(GraphMap* map, int x, int y)
 
 			map->getActorPosition(i, goalX, goalY);
 			
-			goBack = BFSearch(map, goalX, goalY, cur);
-			if(goBack == 0)
+		
+			goBack = reachOthers(map, goalX, goalY);
+			if(goBack == -1)
 			{
 				skipped = true;
 				continue;
 			}
 
 			goal = new Pos(goalX, goalY);
-			delete cur;
-			delete goBack;
 			return goal;
 		
 		}
@@ -206,9 +220,36 @@ Pos* simplehero::findGoal(GraphMap* map, int x, int y)
 
 //	printf("Going for (%d,%d)\n", goalX, goalY);
 	goal = new Pos(goalX, goalY);
-	delete cur;
-	delete goBack;
+
+
 	return goal;
+}
+
+int simplehero::reachOthers(GraphMap* map, int x, int y)
+{
+	int a, b;
+	for(int i = 0; i < map->getNumActors(); i++)
+	{
+		if(map->getActorType(i) & ACTOR_EATABLE)
+		{
+			if(map->getActorType(i) & ACTOR_DEAD)
+			{
+				continue;
+			}
+			map->getActorPosition(i, a, b);
+			if(x == a && y == b)
+			{
+				continue;
+			}
+			int v = map->getVertex(a, b);
+			int s = BFSearch(map, x, y, v);
+			if(s == -1)
+			{
+				return -1;
+			}
+		}
+	}
+	return 0;
 }
 
 Actor* simplehero::duplicate()

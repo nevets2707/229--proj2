@@ -2,7 +2,7 @@ Project 2A
 
 1) Steven Monson - srmonson
 
-2) SimpleHero - Tries to find an eatable that the hero can reach and also go back to its current position. If none can be reached it chooses the first edible available. Then it uses a breadth first search to find a path to the edible.
+2) SimpleHero - First it sees if any of it's neighbors are edible and grabs one if it is. Then it tries to find an eatable that the hero can reach and that all other eatables can be reached from that spot. If none can be reached it chooses the first edible available. Then it uses a breadth first search to find a path to the edible.
 
 3) 
 
