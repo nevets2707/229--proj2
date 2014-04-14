@@ -11,6 +11,7 @@
 #include "OtherActors.hpp"
 #include "simplehero.hpp"
 #include "SmartHero.hpp"
+#include "SmartPowerup.hpp"
 #include <stdlib.h>
 
 int main( int argc, char** argv )
@@ -19,8 +20,9 @@ int main( int argc, char** argv )
 	
 	actors[0] = new simplehero(ACTOR_HERO);
 //	actors[1] = new SmartHero(ACTOR_HERO);
-
-	int num_actors = 1;
+	
+	actors[1] = new SmartPowerup(ACTOR_POWERUP);
+	int num_actors = 2;
 
 	GameManager* manager = new GameManager(argc, argv, actors, num_actors);
 	manager->addActor(new Actor(ACTOR_HERO));

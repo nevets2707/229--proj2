@@ -7,8 +7,8 @@
 class SmartPowerup : public Actor
 {
 	private:
-		Pos* BFSearch(GraphMap* map, int x, int y, Pos* g);
-		Pos* findGoal(GraphMap* map, int x, int y);
+		int BFSearch(GraphMap* map, int x, int y, int g);
+		int findGoal(GraphMap* map, int x, int y);
 
 	public:
 		SmartPowerup(int type);

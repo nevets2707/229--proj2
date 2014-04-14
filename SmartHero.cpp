@@ -1,7 +1,8 @@
 #include <queue>
+#include <vector>
 #include <set>
 #include "SmartHero.hpp"
-#include "Pos.hpp"
+#include "Node.hpp"
 
 SmartHero::SmartHero(int type) : Actor(type)
 {
@@ -13,36 +14,28 @@ SmartHero::~SmartHero()
 
 int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
-/*	int x, y, a, b;
-	Pos** p;
-	Pos* goal = findGoal(map, cur_x, cur_y);
+	int x, y, a, b;
+
+	int goal = findGoal(map, cur_x, cur_y);
 	
-	if(goal == 0)
+	if(goal == -1)
 	{
 		printf("Couldn't find goal\n");
 		return 0;
 	}
 
 
-	Pos* toGo = BFSearch(map, cur_x, cur_y, goal);
+	int toGo = BFSearch(map, cur_x, cur_y, goal);
 	
 	//printf("Done searching\n");
 
-	if(toGo == 0)
+	if(toGo == -1)
 	{
 	//	printf("No target found\n");
 		return 0;
 	}
-	
-	p = toGo->getPath();
 
-	if(toGo->getPathSize() == 1)
-	{
-		return 0;
-	}
-
-		x = p[1]->getX();
-		y = p[1]->getY();
+	map->getPosition(toGo, x, y);
 	
 	for(int i = 0; i < map->getNumNeighbors(cur_x, cur_y); i++)
 	{
@@ -54,40 +47,41 @@ int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	}
 	printf("Shouldn't get here");
 	return 0;
-*/
+
 }
 
-Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
+int SmartHero::BFSearch(GraphMap* map, int x, int y, int g)
 {
-/*	int a, b;
+	int a, b;
 	int enemyX, enemyY;
 	int vert;
+	std::vector<int> temp;
 	bool skip;
-	Pos* temp;
-	Pos* temp2;
-	std::queue<Pos*> q;
-	Pos* start = new Pos(x, y);
-	start->setPathSize(0);
-	start->makePath(0, 0);
+	int count = 0;
+	int start = map->getVertex(x, y);
+
+	std::priority_queue<Node> q;
+
 	std::set<int> touched;
 
-	if(start->equals(g))
+	if(start == g)
 	{
 		return start;
 	}
-
-	q.push(start);
-	vert = map->getVertex(start->getX(), start->getY());
-	touched.insert(vert);
+	Node first(count, std::vector<int> a, start);
+	q.push(first);
+	touched.insert(start);
 
 	while(!q.empty())
 	{
-		temp = q.front();
+		count++;
+		Node temp = q.top();
 		q.pop();
-		for(int i = 0; i < map->getNumNeighbors(temp->getX(), temp->getY()); i++)
+		int curX, curY;
+		map->getPosition(temp.getPath().back(), curX, curY);
+		for(int i = 0; i < map->getNumNeighbors(curX, curY); i++)
 		{
-			map->getNeighbor(temp->getX(), temp->getY(), i, a, b);
-			temp2 = new Pos(a,b);
+			map->getNeighbor(curX, curY, i, a, b);
 			vert = map->getVertex(a, b);
 			skip = false;
 			if(!touched.count(vert))
@@ -108,28 +102,28 @@ Pos* SmartHero::BFSearch(GraphMap* map, int x, int y, Pos* g)
 				{
 					continue;
 				}
-				temp2->setPathSize(temp->getPathSize());
-				temp2->makePath(temp->getPathSize(), temp->getPath());
+
+				Node temp2 = new Node(count, temp.getPath(), vert);
 				q.push(temp2);
 				touched.insert(vert);
 			}
-			if(temp2->equals(g))
+			if(vert == g)
 			{
-				return temp2;
+				return temp.getPath().at(1);
 			}
 		}
 	}
 
-	return 0;
-*/
+	return -1;
+
 }
 
-Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
+int SmartHero::findGoal(GraphMap* map, int x, int y)
 {
-/*	Pos* goal;
+	int goal;
 	int goalX, goalY;
 	bool skipped = false;
-	Pos* cur = new Pos(x, y);
+	int cur = map->getVertex(x, y);
 	for(int i = 0; i <= map->getNumActors(); i++)
 	{
 		if(i == map->getNumActors())
@@ -138,26 +132,22 @@ Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
 			{
 				continue;
 			}
-			return 0;
+			return -1;
 		}
 
-		if(map->getActorType(i) & 4)
+		if(map->getActorType(i) & ACTOR_EATABLE)
 		{
-			if(map->getActorType(i) & 16)
+			if(map->getActorType(i) & ACTOR_DEAD)
 			{
 				continue;
 			}
 			map->getActorPosition(i, goalX, goalY);
-			if(goalX == -1 && goalY == -1)
-			{
-				continue;
-			}
 			if(!BFSearch(map, goalX, goalY, cur))
 			{
 				skipped = true;
 				continue;
 			}
-			goal = new Pos(goalX, goalY);
+			goal = map->getVertex(goalX, goalY);
 			return goal;
 		}
 		
@@ -171,17 +161,13 @@ Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
 				return 0;
 			}
 
-			if(map->getActorType(i) & 4)
+			if(map->getActorType(i) & ACTOR_EATABLE)
 			{
-				if(map->getActorType(i) & 16)
+				if(map->getActorType(i) & ACTOR_DEAD)
 				{
 					continue;
 				}
 				map->getActorPosition(i, goalX, goalY);
-				if(goalX == -1 && goalY == -1)
-				{
-					continue;
-				}
 				break;	
 			}
 			
@@ -189,9 +175,9 @@ Pos* SmartHero::findGoal(GraphMap* map, int x, int y)
 	}
 
 //	printf("Going for (%d,%d)\n", goalX, goalY);
-	goal = new Pos(goalX, goalY);
+	goal = map->getVertex(goalX, goalY);
 	return goal;
-*/
+
 }
 
 Actor* SmartHero::duplicate()
