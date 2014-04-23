@@ -70,7 +70,7 @@ int RandomActor::selectNeighbor( GraphMap* map, int x, int y )
 		}
 		count++;
 	}
-	while ( count < 10 && choice_in_avoid_list );
+	while ( count < 5 && choice_in_avoid_list );
 
 	for ( int i = this->num_to_avoid - 1; i > 0; i-- )
 	{

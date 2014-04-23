@@ -2,7 +2,6 @@
 #include <vector>
 #include <set>
 #include "SmartHero.hpp"
-#include "Node.hpp"
 
 SmartHero::SmartHero(int type) : Actor(type)
 {
@@ -14,6 +13,7 @@ SmartHero::~SmartHero()
 
 int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 {
+
 	int x, y, a, b;
 
 	int goal = findGoal(map, cur_x, cur_y);
@@ -52,70 +52,113 @@ int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 
 int SmartHero::BFSearch(GraphMap* map, int x, int y, int g)
 {
-	int a, b;
+	
+	int curX, curY;
+	int tempX, tempY;
 	int enemyX, enemyY;
+	int dist, minDist;
 	int vert;
-	std::vector<int> temp;
-	bool skip;
-	int count = 0;
-	int start = map->getVertex(x, y);
-
-	std::priority_queue<Node> q;
-
+	bool isEnemy;
+	std::queue<std::vector<int> > q;
+	std::queue<std::vector<int> > q2;
 	std::set<int> touched;
-
-	if(start == g)
-	{
-		return start;
-	}
-	Node first(count, std::vector<int> a, start);
-	q.push(first);
-	touched.insert(start);
-
+	std::vector<int> temp;
+	std::vector<int> start;
+	start.push_back(map->getVertex(x, y));
+	q.push(start);
+		
 	while(!q.empty())
 	{
-		count++;
-		Node temp = q.top();
+		temp = q.front();
 		q.pop();
-		int curX, curY;
-		map->getPosition(temp.getPath().back(), curX, curY);
+		map->getPosition(temp.back(), curX, curY);
 		for(int i = 0; i < map->getNumNeighbors(curX, curY); i++)
 		{
-			map->getNeighbor(curX, curY, i, a, b);
-			vert = map->getVertex(a, b);
-			skip = false;
-			if(!touched.count(vert))
-			{
-				for(int i = 0; i < map->getNumActors(); i++)
-				{
-					if(map->getActorType(i) & ACTOR_ENEMY)
-					{
-						map->getActorPosition(i, enemyX, enemyY);
-						if(a == enemyX && b == enemyY)
-						{
-							touched.insert(vert);
-							skip = true;
-						}
-					}
-				}
-				if(skip)
-				{
-					continue;
-				}
-
-				Node temp2 = new Node(count, temp.getPath(), vert);
-				q.push(temp2);
-				touched.insert(vert);
-			}
+			isEnemy = false;
+			minDist = -1;
+			std::vector<int> temp2 (temp);
+			map->getNeighbor(curX, curY, i, tempX, tempY);
+			vert = map->getVertex(tempX, tempY);
+			temp2.push_back(vert);
 			if(vert == g)
 			{
-				return temp.getPath().at(1);
+				return temp2.at(1);
+			}
+			for(int j = 0; j < map->getNumActors(); j++)
+			{
+				if(map->getActorType(j) & ACTOR_ENEMY)
+				{
+					map->getActorPosition(j, enemyX, enemyY);
+					if(enemyX == tempX && enemyY == tempY)
+					{
+						isEnemy = true;
+						break;
+					}
+					dist = (tempX - enemyX) * (tempX - enemyX) + (tempY - enemyY) * (tempY - enemyY);
+					if(minDist == -1)
+					{
+						minDist = dist;
+					}
+					else if(dist < minDist)
+					{
+						minDist = dist;
+					}
+
+				}
+			}
+			if(!touched.count(vert) && !isEnemy)
+			{
+				if(minDist > 3 || minDist == -1)
+				{
+					q.push(temp2);
+					touched.insert(vert);
+				}
+				else
+				{
+					q2.push(temp2);
+				}
 			}
 		}
 	}
 
-	return -1;
+	while(!q2.empty()) // may have probem with touched
+	{
+		temp = q2.front();
+		q2.pop();
 
+		map->getPosition(temp.back(), curX, curY);
+		for(int i = 0; i < map->getNumNeighbors(curX, curY); i++)
+		{
+			map->getNeighbor(curX, curY, i, tempX, tempY);
+			vert = map->getVertex(tempX, tempY);
+			if(!touched.count(vert))
+			{
+				std::vector<int> temp2 (temp);
+				temp2.push_back(vert);
+				touched.insert(vert);
+				if(vert == g)
+				{
+					return temp2.at(1);
+				}
+				for(int j = 0; j <= map->getNumActors(); j++)
+				{
+					if(j == map->getNumActors())
+					{
+						q2.push(temp2);
+					}
+					if(map->getActorType(j) & ACTOR_ENEMY)
+					{
+						map->getActorPosition(j, enemyX, enemyY);
+						if(tempX == enemyX && tempY == enemyY)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	return -1;
 }
 
 int SmartHero::findGoal(GraphMap* map, int x, int y)
@@ -142,7 +185,7 @@ int SmartHero::findGoal(GraphMap* map, int x, int y)
 				continue;
 			}
 			map->getActorPosition(i, goalX, goalY);
-			if(!BFSearch(map, goalX, goalY, cur))
+			if(BFSearch(map, goalX, goalY, cur) == -1)
 			{
 				skipped = true;
 				continue;

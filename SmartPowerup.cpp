@@ -19,14 +19,12 @@ int SmartPowerup::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	actorPair = findGoal(map, cur_x, cur_y);
 	if(actorPair == -1)
 	{
-		actorPair = 0;
 		return 0;
 	}	
 	
 	map->getActorPosition(actorPair, a, b);	
 	goal = map->getVertex(a, b);	
 	
-	printf("%d\n", actorPair);
 	int goTo = BFSearch(map, cur_x, cur_y, goal);
 
 	if(goTo == -1)
@@ -50,7 +48,9 @@ int SmartPowerup::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 int SmartPowerup::BFSearch(GraphMap* map, int x, int y, int g)
 {
 	int a, b, curX, curY;
+	int heroX, heroY;
 	int vert;
+	bool badPath;
 	std::queue<std::vector<int> > q;
 	std::vector<int> first;	
 	std::set<int> touched;
@@ -72,6 +72,7 @@ int SmartPowerup::BFSearch(GraphMap* map, int x, int y, int g)
 		map->getPosition(temp.back(), curX, curY);
 		for(int i = 0; i < map->getNumNeighbors(curX, curY); i++)
 		{
+			badPath = false;
 			map->getNeighbor(curX, curY, i, a, b);
 			vert = map->getVertex(a, b);
 			if(!touched.count(vert))
@@ -79,7 +80,21 @@ int SmartPowerup::BFSearch(GraphMap* map, int x, int y, int g)
 				std::vector<int> temp2 (temp);
 				temp2.push_back(vert);
 				touched.insert(vert);
-				q.push(temp2);
+				for(int j = 0; j < map->getNumActors(); j++)
+				{
+					if(map->getActorType(j) & ACTOR_HERO)
+					{
+						map->getActorPosition(j, heroX, heroY);
+						if(vert == map->getVertex(heroX, heroY))
+						{
+							badPath = true;
+						}
+					}
+				}
+				if(!badPath)
+				{
+					q.push(temp2);
+				}
 				if(vert == g)
 				{
 					return temp2.at(1);
@@ -91,8 +106,7 @@ int SmartPowerup::BFSearch(GraphMap* map, int x, int y, int g)
 }	
 
 int SmartPowerup::findGoal(GraphMap* map, int x, int y)
-{
-	
+{	
 	int temp, tempX, tempY;
 	int temp2;
 	int enemyX, enemyY;

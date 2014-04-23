@@ -27,8 +27,8 @@ SmartEnemy.o : SmartEnemy.cpp Pos.o
 SmartPowerup.o : SmartPowerup.cpp Pos.o
 	g++ -g -Wall -c SmartPowerup.cpp
 
-ssbros : ssbros.cpp OtherActors.o simplehero.o SmartPowerup.o Pos.o
-	g++ -g -Wall -o ssbros ssbros.cpp Actor.o GraphMap.o GameManager.o OtherActors.o Pursuer.o simplehero.o SmartPowerup.o Pos.o -lncurses
+ssbros : ssbros.cpp OtherActors.o simplehero.o SmartHero.o SmartEnemy.o SmartPowerup.o Pos.o
+	g++ -g -Wall -o ssbros ssbros.cpp Actor.o GraphMap.o GameManager.o OtherActors.o Pursuer.o simplehero.o SmartHero.o SmartEnemy.o SmartPowerup.o Pos.o -lncurses
 
 OtherActors.o: OtherActors.cpp
 	g++ -g -Wall -c OtherActors.cpp
