@@ -131,7 +131,7 @@ int SmartPowerup::findGoal(GraphMap* map, int x, int y)
 					if(map->getActorType(j) & ACTOR_ENEMY)
 					{
 						map->getActorPosition(j, enemyX, enemyY);
-						if(tempX == enemyX && tempY == enemyY)
+						if(a == enemyX && b == enemyY)
 						{
 							return j;
 						}

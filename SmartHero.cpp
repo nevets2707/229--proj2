@@ -20,7 +20,6 @@ int SmartHero::selectNeighbor(GraphMap* map, int cur_x, int cur_y)
 	
 	if(goal == -1)
 	{
-		printf("Couldn't find goal\n");
 		return 0;
 	}
 
@@ -163,64 +162,84 @@ int SmartHero::BFSearch(GraphMap* map, int x, int y, int g)
 
 int SmartHero::findGoal(GraphMap* map, int x, int y)
 {
-	int goal;
-	int goalX, goalY;
-	bool skipped = false;
-	int cur = map->getVertex(x, y);
-	for(int i = 0; i <= map->getNumActors(); i++)
-	{
-		if(i == map->getNumActors())
-		{
-			if(skipped)
-			{
-				continue;
-			}
-			return -1;
-		}
+	int temp, temp2;
+	int curX, curY;
+	int tempX, tempY;
+	int enemyX, enemyY;
+	int eatX, eatY;
+	int dist;
+	bool skip;
+	std::queue<int> q;
+	std::set<int> touched;
+	std::vector<int> opt2;
+	q.push(map->getVertex(x,y));
+	dist = 0;
 
-		if(map->getActorType(i) & ACTOR_EATABLE)
-		{
-			if(map->getActorType(i) & ACTOR_DEAD)
-			{
-				continue;
-			}
-			map->getActorPosition(i, goalX, goalY);
-			if(BFSearch(map, goalX, goalY, cur) == -1)
-			{
-				skipped = true;
-				continue;
-			}
-			goal = map->getVertex(goalX, goalY);
-			return goal;
-		}
-		
-	}
-	if(skipped)
+	while(!q.empty())
 	{
-		for(int i = 0; i <= map->getNumActors(); i++)
-		{
-			if(i == map->getNumActors())
+		temp = q.front();
+		q.pop();
+		map->getPosition(temp, curX, curY);
+		dist++;
+		for(int i = 0; i < map->getNumNeighbors(curX, curY); i++)
+		{	
+			map->getNeighbor(curX, curY, i, tempX, tempY);
+			temp2 = map->getVertex(tempX, tempY);
+			if(!touched.count(temp2))
 			{
-				return 0;
-			}
-
-			if(map->getActorType(i) & ACTOR_EATABLE)
-			{
-				if(map->getActorType(i) & ACTOR_DEAD)
+				for(int j = 0; j < map->getNumActors(); j++)
 				{
-					continue;
+					if(map->getActorType(j) & ACTOR_EATABLE)
+					{
+						if(map->getActorType(j) & ACTOR_DEAD)
+						{
+							continue;
+						}
+
+						map->getActorPosition(j, eatX, eatY);
+						if(tempX == eatX && tempY == eatY)
+						{
+							int goal = map->getVertex(tempX, tempY);
+							if(BFSearch(map, curX, curY, goal) == -1)
+							{
+								continue;
+							}
+							skip = false;
+							for(int k = 0; k < map->getNumActors(); k++)
+							{
+								if(map->getActorType(k) & ACTOR_ENEMY)
+								{
+									map->getActorPosition(k, enemyX, enemyY);
+									if((enemyX - tempX) * (enemyX - tempX) + (enemyY - tempY) * (enemyY - tempY) == 0)
+									{
+										return 0;
+									}
+									if((enemyX - tempX) * (enemyX - tempX) + (enemyY - tempY) * (enemyY - tempY) < dist)
+									{
+										opt2.push_back(goal);
+										skip = true;
+										break;
+									}
+								}
+							}
+							if(!skip)
+							{
+								return goal;
+							}
+						}
+					}
 				}
-				map->getActorPosition(i, goalX, goalY);
-				break;	
+				touched.insert(temp2);
+				q.push(temp2);
 			}
-			
 		}
 	}
+	if(opt2.size() == 0)
+	{
+		return -1;
+	}
 
-//	printf("Going for (%d,%d)\n", goalX, goalY);
-	goal = map->getVertex(goalX, goalY);
-	return goal;
-
+	return opt2.at(0);
 }
 
 Actor* SmartHero::duplicate()
